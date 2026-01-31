@@ -182,3 +182,28 @@
   - Still turns red when under 60 seconds. Still has X to release.
 
 - Build compiles cleanly after all changes.
+
+## Step 9: Reason for Visit & Insurance Information (Completed)
+
+### What was done
+- **Added shadcn components**: `textarea` and `checkbox` via `npx shadcn@latest add`. Fixed `rounded-md` → `rounded-xl` on Textarea to match design tokens.
+- **Extended Zod schema** (`src/components/IntakeForm.tsx`):
+  - 7 new fields: `visitReason`, `visitDetails`, `selfPay`, `insuranceProvider`, `memberId`, `groupNumber`, `policyholderRelationship`, `policyholderName`, `policyholderDob`.
+  - `.superRefine()` conditional validation:
+    - Insurance fields (`insuranceProvider`, `memberId`, `policyholderRelationship`) required unless `selfPay === true`.
+    - `policyholderName` and `policyholderDob` required only when `policyholderRelationship ≠ "Self"`.
+- **Reason for Visit section** (after Contact row, separated by `border-t` divider):
+  - Visit Type select with 8 options: Annual Checkup, Sick Visit, Follow-up, New Patient, Specialist Referral, Prescription Refill, Lab Work, Other.
+  - Optional "Additional details" textarea (500 char max, secondary label styling).
+- **Insurance Information section** (after Reason for Visit, separated by `border-t` divider):
+  - Self-pay checkbox toggle — hides all insurance fields when checked.
+  - Insurance Provider + Member ID (required, 2-col grid).
+  - Group Number (optional, secondary styling) + Policyholder Relationship select (required, 2-col grid).
+  - Policyholder Name + DOB — conditionally shown only when relationship ≠ "Self".
+- **Confirmation screen** (`src/components/Confirmation.tsx`):
+  - Added "Reason" tile with `Stethoscope` icon — shows visit reason + details.
+  - Added "Insurance" tile with `Shield` icon — shows "Provider · ID: memberId" or "Self-pay".
+  - Grid changed from `sm:grid-cols-3` to `sm:grid-cols-2 lg:grid-cols-3` for 5 tiles.
+  - Added `formatVisitReason()` and `formatInsurance()` helper functions.
+- **Dependencies**: `@radix-ui/react-checkbox` added via shadcn.
+- Build compiles cleanly.

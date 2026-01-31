@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Calendar, Clock, User } from "lucide-react";
+import { CheckCircle2, Calendar, Clock, User, Stethoscope, Shield } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import type { Appointment } from "@/services/MockAppointmentService";
@@ -17,6 +17,24 @@ function formatDate(iso: string) {
     day: "numeric",
     year: "numeric",
   });
+}
+
+function formatVisitReason(reason: string, details?: string) {
+  if (details && details.trim()) {
+    return `${reason} — ${details}`;
+  }
+  return reason;
+}
+
+function formatInsurance(patient: Appointment["patient"]) {
+  if (patient.selfPay) {
+    return "Self-pay";
+  }
+  const parts = [patient.insuranceProvider];
+  if (patient.memberId) {
+    parts.push(`ID: ${patient.memberId}`);
+  }
+  return parts.filter(Boolean).join(" · ");
 }
 
 export default function Confirmation({ appointment, onBookAnother }: ConfirmationProps) {
@@ -42,7 +60,7 @@ export default function Confirmation({ appointment, onBookAnother }: Confirmatio
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-left">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
         <div className="flex items-start gap-2.5 bg-muted/50 rounded-xl p-3">
           <Calendar className="w-4 h-4 text-primary mt-0.5 shrink-0" />
           <div>
@@ -69,6 +87,26 @@ export default function Confirmation({ appointment, onBookAnother }: Confirmatio
             <p className="text-xs text-muted-foreground">Patient</p>
             <p className="text-sm font-medium text-foreground">
               {fullName}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2.5 bg-muted/50 rounded-xl p-3">
+          <Stethoscope className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs text-muted-foreground">Reason</p>
+            <p className="text-sm font-medium text-foreground">
+              {formatVisitReason(patient.visitReason, patient.visitDetails)}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-start gap-2.5 bg-muted/50 rounded-xl p-3">
+          <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+          <div>
+            <p className="text-xs text-muted-foreground">Insurance</p>
+            <p className="text-sm font-medium text-foreground">
+              {formatInsurance(patient)}
             </p>
           </div>
         </div>

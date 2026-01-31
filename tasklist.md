@@ -11,3 +11,4 @@
     - Validate success/error states and data integrity.
 - [x] **Step 7: Mobile Responsiveness Polish.** Final pass on layout for small screens.
 - [x] **Step 8: Final Validation.** Run through the full user flow to ensure data integrity, design fidelity, and "Medical Modern" compliance.
+- [x] **Step 9: Reason for Visit & Insurance Information.** Added visit reason (select + textarea) and insurance information (self-pay toggle, conditional provider/member/policyholder fields) sections to IntakeForm with Zod superRefine validation. Updated Confirmation screen with Stethoscope and Shield summary tiles.
