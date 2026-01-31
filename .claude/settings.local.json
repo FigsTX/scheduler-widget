@@ -8,7 +8,10 @@
       "Bash(npx shadcn@latest add:*)",
       "Bash(npm run build:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nImplement Patient Intake Widget with full booking flow\n\n- Provider header with doctor profile, rating, and telehealth badge\n- 7-day horizontal date picker with week navigation\n- Time slot grid with mock availability generation\n- Soft-hold system with 5-minute countdown timer\n- Multi-column patient intake form with Zod validation\n- localStorage persistence via MockAppointmentService with uuid\n- Confirmation screen with appointment summary\n- Mobile-responsive layouts across all components\n- Medical Modern design tokens \\(teal primary, 12px radius, Inter font\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nImplement Patient Intake Widget with full booking flow\n\n- Provider header with doctor profile, rating, and telehealth badge\n- 7-day horizontal date picker with week navigation\n- Time slot grid with mock availability generation\n- Soft-hold system with 5-minute countdown timer\n- Multi-column patient intake form with Zod validation\n- localStorage persistence via MockAppointmentService with uuid\n- Confirmation screen with appointment summary\n- Mobile-responsive layouts across all components\n- Medical Modern design tokens \\(teal primary, 12px radius, Inter font\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git remote add:*)",
+      "Bash(git push:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd date range to calendar and streamline slot-to-form flow\n\n- Display date range \\(e.g. \"Jan 30 – Feb 5\"\\) between navigation arrows\n- Show intake form immediately on slot selection, removing extra click\n- Compact soft-hold timer into single-row inline strip\n- Update run_notes.md with full project history\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

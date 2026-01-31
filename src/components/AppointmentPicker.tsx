@@ -53,6 +53,18 @@ export default function AppointmentPicker({
     onSlotSelect?.(selectedDate, time);
   }
 
+  const dateRangeLabel = useMemo(() => {
+    const first = days[0];
+    const last = days[days.length - 1];
+    const fmtOpts: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+    const firstStr = first.toLocaleDateString("en-US", fmtOpts);
+    // Only show month on the end date if it differs from the start
+    if (first.getMonth() === last.getMonth()) {
+      return `${firstStr} – ${last.getDate()}`;
+    }
+    return `${firstStr} – ${last.toLocaleDateString("en-US", fmtOpts)}`;
+  }, [days]);
+
   return (
     <Card className="p-6 rounded-xl space-y-5">
       {/* Header row */}
@@ -60,7 +72,7 @@ export default function AppointmentPicker({
         <h3 className="text-base font-semibold text-foreground">
           Select Date &amp; Time
         </h3>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1.5">
           <button
             onClick={() => setWeekOffset((w) => Math.max(w - 1, 0))}
             disabled={weekOffset === 0}
@@ -69,6 +81,9 @@ export default function AppointmentPicker({
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
+          <span className="text-sm font-medium text-muted-foreground min-w-[7.5rem] text-center">
+            {dateRangeLabel}
+          </span>
           <button
             onClick={() => setWeekOffset((w) => w + 1)}
             className="p-1.5 rounded-xl hover:bg-muted transition-colors"

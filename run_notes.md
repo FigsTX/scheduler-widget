@@ -153,3 +153,32 @@
 - Final build passes cleanly after all fixes.
 - Marked Step 8 as complete in `tasklist.md`.
 - **All 8 steps are now complete.**
+
+## Git Setup & Initial Push
+
+- Local git repo initialized by `create-next-app` scaffolding (commit `7cd2638`).
+- All widget code committed as `a0a35d9` — "Implement Patient Intake Widget with full booking flow" (26 files, 2931 insertions).
+- Remote added: `origin` → `https://github.com/FigsTX/scheduler-widget.git`.
+- Pushed `master` branch to remote.
+
+## Post-Roadmap: UX Refinements
+
+### Changes made
+- **Date range label on calendar** (`src/components/AppointmentPicker.tsx`):
+  - Added a computed `dateRangeLabel` displayed between the chevron arrows (e.g., "Jan 30 – Feb 5").
+  - Smart formatting: only shows the month on the end date if it differs from the start month (e.g., "Jan 30 – 5" when same month).
+  - Centered with `min-w-[7.5rem]` for stable layout.
+
+- **Streamlined slot → form flow** (`src/app/page.tsx`):
+  - Removed intermediate `showIntake` state and `handleContinue` function.
+  - Selecting a time slot now immediately shows the timer + intake form (one fewer click).
+  - Flow is now: select slot → soft-hold timer + form appear together → fill out → submit.
+
+- **Compact timer banner** (`src/components/SoftHoldBanner.tsx`):
+  - Redesigned from a multi-row banner with "Continue to Intake" button into a single-row compact strip.
+  - Shows slot info + countdown inline: "Thu, Jan 30 at 10:00 AM · Hold expires in 4:32".
+  - Removed `ArrowRight` and `Button` imports (no longer needed).
+  - Removed `onContinue` prop from the interface.
+  - Still turns red when under 60 seconds. Still has X to release.
+
+- Build compiles cleanly after all changes.
