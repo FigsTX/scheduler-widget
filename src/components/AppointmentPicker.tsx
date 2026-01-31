@@ -1,0 +1,97 @@
+"use client";
+
+import { useState, useMemo } from "react";
+import { Card } from "@/components/ui/card";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import DatePicker from "./DatePicker";
+import TimeSlots from "./TimeSlots";
+
+/** Generate mock time slots for a given date */
+function generateSlots(date: Date): string[] {
+  const day = date.getDay();
+  // No slots on Sunday
+  if (day === 0) return [];
+
+  const base = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
+    "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM"];
+
+  // Vary availability by day — remove some slots to feel realistic
+  const seed = date.getDate() + day;
+  return base.filter((_, i) => (i + seed) % 3 !== 0);
+}
+
+export default function AppointmentPicker({
+  onSlotSelect,
+}: {
+  onSlotSelect?: (date: Date, time: string) => void;
+}) {
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
+  const days = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const start = new Date(today);
+    start.setDate(start.getDate() + weekOffset * 7);
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      return d;
+    });
+  }, [weekOffset]);
+
+  const slots = useMemo(() => generateSlots(selectedDate), [selectedDate]);
+
+  function handleDateSelect(date: Date) {
+    setSelectedDate(date);
+    setSelectedTime(null);
+  }
+
+  function handleTimeSelect(time: string) {
+    setSelectedTime(time);
+    onSlotSelect?.(selectedDate, time);
+  }
+
+  return (
+    <Card className="p-6 rounded-xl space-y-5">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-semibold text-foreground">
+          Select Date &amp; Time
+        </h3>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setWeekOffset((w) => Math.max(w - 1, 0))}
+            disabled={weekOffset === 0}
+            className="p-1.5 rounded-xl hover:bg-muted disabled:opacity-30 transition-colors"
+            aria-label="Previous week"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setWeekOffset((w) => w + 1)}
+            className="p-1.5 rounded-xl hover:bg-muted transition-colors"
+            aria-label="Next week"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Date strip */}
+      <DatePicker
+        days={days}
+        selectedDate={selectedDate}
+        onSelect={handleDateSelect}
+      />
+
+      {/* Time slots */}
+      <TimeSlots
+        slots={slots}
+        selectedTime={selectedTime}
+        onSelect={handleTimeSelect}
+      />
+    </Card>
+  );
+}
