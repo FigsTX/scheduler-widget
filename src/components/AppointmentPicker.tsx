@@ -66,7 +66,7 @@ export default function AppointmentPicker({
   }, [days]);
 
   return (
-    <Card className="p-6 rounded-xl space-y-5">
+    <Card className="p-4 sm:p-6 rounded-xl space-y-4 sm:space-y-5">
       {/* Header row */}
       <div className="flex items-center justify-between">
         <h3 className="text-base font-semibold text-foreground">

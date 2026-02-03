@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Widget Integration Test</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f0f0f0;
+      color: #333;
+      padding: 40px 20px;
+    }
+    .page-header {
+      max-width: 800px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+    .page-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      color: #666;
+      font-size: 14px;
+    }
+    .provider-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 32px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .provider-section {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .provider-section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .snippet-code {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-family: "Fira Code", "Consolas", monospace;
+      overflow-x: auto;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>Booking Widget - Integration Test</h1>
+    <p>This page simulates a host website embedding the booking widget via the JS snippet.</p>
+  </div>
+
+  <div class="provider-grid">
+    <!-- Provider 1 -->
+    <div class="provider-section">
+      <h2>Dr. Sarah Smith - Family Medicine</h2>
+      <div id="booking-smith"></div>
+      <div class="snippet-code">
+        &lt;div id="booking-smith"&gt;&lt;/div&gt;<br />
+        &lt;script src="/widget-loader.js" data-provider="dr-sarah-smith" data-element="booking-smith"&gt;&lt;/script&gt;
+      </div>
+    </div>
+
+    <!-- Provider 2 -->
+    <div class="provider-section">
+      <h2>Dr. James Chen - Internal Medicine</h2>
+      <div id="booking-chen"></div>
+      <div class="snippet-code">
+        &lt;div id="booking-chen"&gt;&lt;/div&gt;<br />
+        &lt;script src="/widget-loader.js" data-provider="dr-james-chen" data-element="booking-chen"&gt;&lt;/script&gt;
+      </div>
+    </div>
+
+    <!-- Provider 3 -->
+    <div class="provider-section">
+      <h2>Dr. Maria Gonzalez - Pediatrics</h2>
+      <div id="booking-gonzalez"></div>
+      <div class="snippet-code">
+        &lt;div id="booking-gonzalez"&gt;&lt;/div&gt;<br />
+        &lt;script src="/widget-loader.js" data-provider="dr-maria-gonzalez" data-element="booking-gonzalez"&gt;&lt;/script&gt;
+      </div>
+    </div>
+  </div>
+
+  <!-- Load the widget snippets -->
+  <script src="/widget-loader.js" data-provider="dr-sarah-smith" data-element="booking-smith"></script>
+  <script src="/widget-loader.js" data-provider="dr-james-chen" data-element="booking-chen"></script>
+  <script src="/widget-loader.js" data-provider="dr-maria-gonzalez" data-element="booking-gonzalez"></script>
+</body>
+</html>

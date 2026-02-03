@@ -134,7 +134,7 @@ export default function IntakeForm({ onSubmit }: IntakeFormProps) {
   const policyholderRelationship = watch("policyholderRelationship");
 
   return (
-    <Card className="p-6 rounded-xl">
+    <Card className="p-4 sm:p-6 rounded-xl">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-0">
         {/* ───────── Patient Information ───────── */}
         <h3 className="text-base font-semibold text-foreground mb-5">
@@ -143,7 +143,7 @@ export default function IntakeForm({ onSubmit }: IntakeFormProps) {
 
         <div className="space-y-5">
           {/* Name rows */}
-          <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_1fr_auto] gap-3 items-start">
+          <div className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_1fr_auto] gap-2 sm:gap-3 items-start">
             <div>
               <Label htmlFor="firstName" className="text-sm font-medium">
                 First Name <span className="text-red-500">*</span>

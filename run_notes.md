@@ -207,3 +207,67 @@
   - Added `formatVisitReason()` and `formatInsurance()` helper functions.
 - **Dependencies**: `@radix-ui/react-checkbox` added via shadcn.
 - Build compiles cleanly.
+
+## Step 10: Embeddable Widget Architecture (Completed)
+
+### What was done
+- **Created `src/services/MockProviderService.ts`** — provider data layer:
+  - `Provider` interface: `id`, `name`, `avatarUrl`, `specialty`, `location` (city/state), `availability` (days + hours), `theme` (primaryColor).
+  - 3 mock providers with distinct themes:
+    - **Dr. Sarah Smith** — Family Medicine, Austin TX, Mon–Fri 9–5, Teal (`#0D9488`).
+    - **Dr. James Chen** — Internal Medicine, Dallas TX, Mon–Fri 8–4, Blue (`#2563EB`).
+    - **Dr. Maria Gonzalez** — Pediatrics, San Antonio TX, Mon/Wed–Fri 10–6, Purple (`#7C3AED`).
+  - `getAll()`, `getById()`, `getSlots(provider, date)` methods. `getSlots` generates 30-min intervals from provider availability hours.
+
+- **Created embed route** (`src/app/embed/[providerId]/`):
+  - **`layout.tsx`** — minimal layout with transparent background, no nav/footer.
+  - **`page.tsx`** — self-contained booking flow optimized for narrow containers:
+    - `ProviderMiniHeader` — compact provider card (avatar initials with theme color, name, specialty, location).
+    - Full flow in-widget: calendar → soft-hold + intake form → confirmation.
+    - `postMessage` protocol: sends `WIDGET_EXPAND` when user selects a slot, `WIDGET_COLLAPSE` when user releases hold, closes, or books another.
+    - Dynamically applies provider's `theme.primaryColor` as CSS variable.
+    - 404 handling for unknown provider IDs.
+
+- **Created `public/widget-loader.js`** — the "Smart Snippet" for client integration:
+  - Reads `data-provider` and `data-element` attributes from `<script>` tag.
+  - Injects an iframe (`/embed/{providerId}`) into the target DOM element.
+  - Listens for `postMessage` events from the iframe:
+    - `WIDGET_EXPAND` — transitions iframe to `position: fixed` centered modal (max 480px wide, 90vh tall) with semi-transparent backdrop overlay.
+    - `WIDGET_COLLAPSE` — reverts iframe to inline position within the host page.
+  - Backdrop click collapses the widget.
+  - Smooth CSS transitions on expand/collapse (0.3s ease).
+
+- **Created `public/test-widget.html`** — integration test page:
+  - Simulates a host website with all 3 providers embedded side-by-side.
+  - Each widget section shows the provider name, the embedded widget, and the snippet code to copy.
+
+- **Component responsiveness adjustments**:
+  - `IntakeForm`: padding `p-4 sm:p-6`, name row gap `gap-2 sm:gap-3`.
+  - `Confirmation`: padding `p-4 sm:p-6`, spacing `space-y-4 sm:space-y-5`, grid simplified to `sm:grid-cols-2`.
+  - `AppointmentPicker`: padding `p-4 sm:p-6`, spacing `space-y-4 sm:space-y-5`.
+
+- **Routes registered**:
+  - `/` — main standalone page (static).
+  - `/embed/[providerId]` — dynamic embed route.
+
+- **Test URLs**:
+  - Main app: `http://localhost:3000`
+  - Single embed: `http://localhost:3000/embed/dr-sarah-smith`
+  - Widget test page: `http://localhost:3000/test-widget.html`
+
+- Build compiles cleanly with zero errors.
+
+## Step 10b: Widget Popup Close & Reset Flow (Completed)
+
+### Problem
+When clicking the backdrop to dismiss the expanded widget popup, the iframe collapsed back to inline size but the intake form was still rendered inside it, resulting in a cramped/broken layout.
+
+### What was done
+- **`public/widget-loader.js`**:
+  - Added `collapseAndReset()` function — sends a `WIDGET_RESET` `postMessage` *into* the iframe before collapsing, telling it to reset state back to the calendar view.
+  - Backdrop click and close button now call `collapseAndReset()` instead of plain `collapse()`.
+  - Added a floating close button (white circle with `×`) that appears top-right of the expanded popup. Hidden when inline.
+- **`src/app/embed/[providerId]/page.tsx`**:
+  - Added a `message` event listener for `WIDGET_RESET` from the parent window.
+  - On reset: calls `releaseHold()`, clears `confirmed` and `error` state — returns widget to clean calendar view.
+- Build compiles cleanly.

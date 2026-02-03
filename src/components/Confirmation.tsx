@@ -44,7 +44,7 @@ export default function Confirmation({ appointment, onBookAnother }: Confirmatio
     .join(" ");
 
   return (
-    <Card className="p-6 rounded-xl text-center space-y-5">
+    <Card className="p-4 sm:p-6 rounded-xl text-center space-y-4 sm:space-y-5">
       <div className="flex justify-center">
         <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
           <CheckCircle2 className="w-8 h-8 text-primary" />
@@ -60,7 +60,7 @@ export default function Confirmation({ appointment, onBookAnother }: Confirmatio
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-left">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
         <div className="flex items-start gap-2.5 bg-muted/50 rounded-xl p-3">
           <Calendar className="w-4 h-4 text-primary mt-0.5 shrink-0" />
           <div>
