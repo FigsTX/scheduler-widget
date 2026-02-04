@@ -6,18 +6,53 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import DatePicker from "./DatePicker";
 import TimeSlots from "./TimeSlots";
 
-/** Generate mock time slots for a given date */
+function isSameDay(a: Date, b: Date) {
+  return (
+    a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate()
+  );
+}
+
+function isTomorrow(date: Date) {
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  return isSameDay(date, tomorrow);
+}
+
+/** Parse "9:00 AM" into 24h hour number */
+function parseSlotHour(slot: string): number {
+  const [time, period] = slot.split(" ");
+  let hour = parseInt(time.split(":")[0], 10);
+  if (period === "PM" && hour !== 12) hour += 12;
+  if (period === "AM" && hour === 12) hour = 0;
+  return hour;
+}
+
+/** Generate mock time slots for a given date, applying lead time rules */
 function generateSlots(date: Date): string[] {
+  const now = new Date();
   const day = date.getDay();
+
   // No slots on Sunday
   if (day === 0) return [];
+
+  // No same-day appointments
+  if (isSameDay(date, now)) return [];
 
   const base = ["9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
     "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM", "4:00 PM"];
 
   // Vary availability by day — remove some slots to feel realistic
   const seed = date.getDate() + day;
-  return base.filter((_, i) => (i + seed) % 3 !== 0);
+  let slots = base.filter((_, i) => (i + seed) % 3 !== 0);
+
+  // After 1 PM today, remove tomorrow's morning slots (before 1 PM)
+  if (isTomorrow(date) && now.getHours() >= 13) {
+    slots = slots.filter((slot) => parseSlotHour(slot) >= 13);
+  }
+
+  return slots;
 }
 
 export default function AppointmentPicker({
@@ -26,7 +61,12 @@ export default function AppointmentPicker({
   onSlotSelect?: (date: Date, time: string) => void;
 }) {
   const [weekOffset, setWeekOffset] = useState(0);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    return tomorrow;
+  });
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
   const days = useMemo(() => {

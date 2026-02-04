@@ -27,19 +27,20 @@ export default function DatePicker({ days, selectedDate, onSelect }: DatePickerP
         const selected = isSameDay(day, selectedDate);
         const today = isToday(day);
         const sunday = day.getDay() === 0;
+        const disabled = sunday || today;
 
         return (
           <button
             key={day.toISOString()}
-            onClick={() => !sunday && onSelect(day)}
-            disabled={sunday}
+            onClick={() => !disabled && onSelect(day)}
+            disabled={disabled}
             className={`
               flex flex-col items-center justify-center flex-1 min-w-[3.5rem] py-3 px-1.5 rounded-xl
               transition-colors text-sm font-medium
               ${
-                selected
+                selected && !disabled
                   ? "bg-primary text-primary-foreground shadow-sm"
-                  : sunday
+                  : disabled
                     ? "bg-muted/50 text-muted-foreground/40 cursor-not-allowed"
                     : "bg-muted/50 text-foreground hover:bg-muted"
               }
@@ -52,11 +53,7 @@ export default function DatePicker({ days, selectedDate, onSelect }: DatePickerP
               {day.getDate()}
             </span>
             {today && (
-              <span
-                className={`text-[10px] mt-0.5 ${
-                  selected ? "text-primary-foreground/80" : "text-primary"
-                }`}
-              >
+              <span className="text-[10px] mt-0.5 text-muted-foreground/60">
                 Today
               </span>
             )}

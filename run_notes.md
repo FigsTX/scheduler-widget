@@ -271,3 +271,90 @@ When clicking the backdrop to dismiss the expanded widget popup, the iframe coll
   - Added a `message` event listener for `WIDGET_RESET` from the parent window.
   - On reset: calls `releaseHold()`, clears `confirmed` and `error` state — returns widget to clean calendar view.
 - Build compiles cleanly.
+
+## Step 11: Microsoft 365 Backend Integration (Steps 3–6 of CMS Tasklist)
+
+### What was done
+
+#### Step 3: Graph Client & Auth
+- **Installed SDKs**: `@microsoft/microsoft-graph-client`, `@azure/identity`, `next-auth` (v4).
+- **`src/lib/auth.ts`** — NextAuth config with Azure AD provider:
+  - Scopes: `User.Read`, `Calendars.ReadWrite`, `Sites.Read.All`, `offline_access`.
+  - JWT callback persists `accessToken`, `refreshToken`, `expiresAt` to both the JWT and server-side file.
+- **`src/lib/tokenStore.ts`** — Server-side token persistence:
+  - `saveTokens()` / `loadTokens()` — writes/reads `.tokens.json` (gitignored).
+  - `getAccessToken()` — returns a valid token, auto-refreshing via Microsoft's `/oauth2/v2.0/token` endpoint when expired (5-min buffer).
+  - This allows widget API routes (anonymous patient traffic) to use the admin's delegated Graph token.
+- **`src/lib/graph.ts`** — Graph client factory:
+  - `getGraphClient(accessToken)` — for delegated calls with a specific token.
+  - `getWidgetGraphClient()` — uses `getAccessToken()` from token store for widget routes.
+- **`src/app/api/auth/[...nextauth]/route.ts`** — NextAuth App Router handler.
+- **`src/types/next-auth.d.ts`** — Type augmentation for `Session.accessToken` and `JWT` fields.
+- Added `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `SHAREPOINT_SITE_HOSTNAME` to `.env`.
+
+#### Step 4: Provider Service (Read Data)
+- **`src/services/ProviderService.ts`**:
+  - `getSiteId(client)` — resolves SharePoint site ID from hostname, cached.
+  - `getListId(client, siteId, listName)` — resolves list GUID by display name, cached in `Map`.
+  - `parseProviderItem()` — maps SharePoint list item fields to `ProviderProfile` interface.
+    - Handles complex Location object (Graph returns nested `address.city`/`address.state`).
+    - Parses Languages (array or comma-separated string).
+    - Parses OverrideWorkDays (comma-separated string to `number[]`).
+  - `getAllProviders()` — fetches all active providers from SharePoint.
+  - `getProviderBySlug(slug)` — finds a single provider by slug field.
+- **API Routes**:
+  - `GET /api/providers` — returns all active providers.
+  - `GET /api/providers/[slug]` — returns single provider by slug.
+
+#### Step 5: Availability Engine
+- **`src/services/AvailabilityService.ts`**:
+  - `getGlobalConfig(client)` — reads `GlobalConfig` list from SharePoint, extracts `DefaultOfficeHours` row (`startHour`, `endHour`, `workDays`, `appointmentDuration`). Cached in memory.
+  - `getProviderRules(provider)` — merges global config with provider-level overrides.
+  - `generatePotentialSlots(startHour, endHour, duration)` — creates time labels at `duration`-minute intervals (e.g., "9:00 AM", "9:30 AM", ..., "4:30 PM").
+  - `getSlots(provider, date)`:
+    - Returns empty if day not in work days.
+    - For Outlook providers: fetches `/users/{email}/calendarView` for the date, filters out slots overlapping with busy/tentative events.
+    - For External providers: returns all potential slots.
+  - `parseSlotToDate()` — converts slot label + date into a `Date` for overlap comparison.
+- **API Route**:
+  - `GET /api/providers/[slug]/slots?date=YYYY-MM-DD` — returns available slots.
+
+#### Step 6: Booking Action
+- **`src/services/BookingService.ts`**:
+  - `bookAppointment({ provider, date, time, patientName, visitReason, phone, email })`:
+    - Builds Outlook calendar event: subject `"New Patient: {name}"`, body with visit reason/phone/email, start/end from slot + duration.
+    - Posts via `POST /users/{email}/events`.
+    - Returns `{ eventId, start, end }`.
+- **API Route**:
+  - `POST /api/book` — accepts `{ providerSlug, date, time, patientName, visitReason, phone, email }`.
+
+#### Infrastructure
+- `.gitignore` updated to exclude `.tokens.json`.
+- `tasklist_CMS.md` updated: Steps 1–6 marked complete, Step 7 ready for manual verification.
+- Build compiles cleanly. All routes registered:
+  - `/api/auth/[...nextauth]`, `/api/providers`, `/api/providers/[slug]`, `/api/providers/[slug]/slots`, `/api/book`.
+
+#### Pending: Admin Consent
+- Azure app registration requires IT admin approval before the delegated permissions (Calendars.ReadWrite, Sites.Read.All) can be used.
+- IT request submitted. Once approved, admin signs in at `/api/auth/signin` to store tokens, enabling all live API routes.
+- Until then, the widget continues to function with `MockProviderService` on existing routes.
+
+## Step 12: Booking Lead Time Rules (Completed)
+
+### What was done
+- **Rule 1 — No same-day appointments**: Today's date is always excluded from booking.
+- **Rule 2 — Afternoon cutoff**: After 1:00 PM, tomorrow's morning slots (before 1 PM) are removed, leaving only afternoon availability.
+
+#### Changes
+- **`src/components/AppointmentPicker.tsx`**:
+  - `generateSlots()` returns empty for today, filters morning slots for tomorrow after 1 PM.
+  - Default `selectedDate` changed from today to tomorrow.
+  - Added helpers: `isSameDay()`, `isTomorrow()`, `parseSlotHour()`.
+- **`src/components/DatePicker.tsx`**:
+  - Today is now disabled (grayed out, unclickable) alongside Sundays.
+  - "Today" label still shows but in muted styling to indicate unavailability.
+- **`src/services/AvailabilityService.ts`** (server-side):
+  - `getSlots()` returns empty for same-day requests.
+  - After 1 PM, tomorrow's morning slots filtered out before calendar overlap check.
+  - Added helpers: `isSameDay()`, `isTomorrow()`.
+- Build compiles cleanly.
